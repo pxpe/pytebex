@@ -84,6 +84,10 @@ class Tebex:
     def __init__(self, secret : str):
         self.secret = secret
         self.info = None
+        try:
+            self.get_information()
+        except:
+            raise TebexError('Invalid secret key')
 
     def __get_favicon(self, domain):
         return favicon.get(domain)[0][0]
@@ -342,7 +346,7 @@ class Tebex:
 
     # Customer Purchases
 
-    def get_customer_purchases(self, player_id : str, package_id : Optional(int)) -> dict:
+    def get_customer_purchases(self, player_id : str, package_id : Optional[int]) -> dict:
         if not player_id:
             return TebexError('No player ID to lookup')
         
