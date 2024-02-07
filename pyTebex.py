@@ -86,15 +86,15 @@ class Tebex:
         self.info = None
         try:
             self.get_information()
-        except:
-            raise TebexError('Invalid secret key')
+        except TebexError as e:
+            raise e
 
     def __get_favicon(self, domain):
         return favicon.get(domain)[0][0]
     
     def __handle_response(self, response : requests.Response):
         if response.status_code != 200:
-            return TebexError(response.json()['error_message'])
+            raise TebexError(response.json()['error_message'])
         return response.json()
     
     # Information
