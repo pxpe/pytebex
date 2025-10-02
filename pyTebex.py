@@ -82,7 +82,7 @@ class Tebex:
     }
         
     def __init__(self, secret : str):
-        self.secret = secret
+        self.HEADERS = {"X-Tebex-Secret": self.secret} 
         self.info = None
         try:
             self.get_information()
@@ -102,7 +102,7 @@ class Tebex:
     def get_information(self) -> dict:
 
         if not self.info:
-            raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['information'], headers={"X-Tebex-Secret": self.secret})
+            raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['information'], headers=)
             raw_data_json = self.__handle_response(raw_data)
 
             icon = '?'
@@ -119,25 +119,25 @@ class Tebex:
     # Command Queue
 
     def get_due_commands(self) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['queue'], headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['queue'], headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     def get_due_offline_commands(self) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['queue_offline_commands'], headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['queue_offline_commands'], headers=self.HEADERS)
         return self.__handle_response(raw_data)
     
     def get_due_online_commands(self, player_id : str) -> dict:
         if not player_id:
             return TebexError('No player ID to get commands')
 
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['queue_online_commands'] + player_id, headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['queue_online_commands'] + player_id, headers=self.HEADERS)
         return self.__handle_response(raw_data)
     
     def delete_due_commands(self, command_ids : list):
         if not command_ids:
             return TebexError('No commands to delete')
         
-        raw_data = requests.delete(self.BASE_URL + self.ENDPOINTS['queue'], headers={"X-Tebex-Secret": self.secret}, data=json.dumps({'ids': command_ids}))
+        raw_data = requests.delete(self.BASE_URL + self.ENDPOINTS['queue'], headers=self.HEADERS, data=json.dumps({'ids': command_ids}))
         if raw_data.status_code != 204:
             return TebexError(raw_data.json()['error_message'])
         return f'{len(command_ids)} commands deleted'
@@ -145,19 +145,19 @@ class Tebex:
     # Listing of categories and packages
 
     def get_listing(self) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['listing'], headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['listing'], headers=self.HEADERS)
         return self.__handle_response(raw_data)
     
 
     # Packages
 
     def get_packages(self, verbose : bool = False) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['packages'], headers={"X-Tebex-Secret": self.secret}, params={'verbose': verbose})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['packages'], headers=self.HEADERS, params={'verbose': verbose})
         return self.__handle_response(raw_data)
 
     
     def get_package(self, package_id : int) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['packages'] + '/' + str(package_id), headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['packages'] + '/' + str(package_id), headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     def update_package(self, package_id : int, update_data : dict):
@@ -166,7 +166,7 @@ class Tebex:
         if not package_id:
             return TebexError('No package ID to update')
 
-        raw_data = requests.put(self.BASE_URL + self.ENDPOINTS['packages'] + '/' + str(package_id), headers={"X-Tebex-Secret": self.secret}, data=json.dumps(update_data))
+        raw_data = requests.put(self.BASE_URL + self.ENDPOINTS['packages'] + '/' + str(package_id), headers=self.HEADERS, data=json.dumps(update_data))
         
         self.__handle_response(raw_data)
         return 'Package ' + str(package_id) + ' updated'
@@ -174,33 +174,33 @@ class Tebex:
     # Community Goals
 
     def get_community_goals(self) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['community_goals'], headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['community_goals'], headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     
     def get_community_goal(self, goal_id : int) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['community_goals'] + '/' + str(goal_id), headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['community_goals'] + '/' + str(goal_id), headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
 
     # Payments
     def get_payments(self, limit : int = 100) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['payments'], headers={"X-Tebex-Secret": self.secret}, params={'limit': limit})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['payments'], headers=self.HEADERS, params={'limit': limit})
         return self.__handle_response(raw_data)
 
     def get_payments_paginated(self, page : int = 1) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['payments'] + '?paged=' + page, headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['payments'] + '?paged=' + page, headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     def get_payment(self, transaction_id : str) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['payments'] + '/' + transaction_id, headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['payments'] + '/' + transaction_id, headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     def create_payment(self, payment_data : TebexPayment ):
         if not payment_data:
             return TebexError('No payment data to create')
 
-        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['payments'], headers={"X-Tebex-Secret": self.secret}, data=(payment_data.toJSON()))
+        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['payments'], headers=self.HEADERS, data=(payment_data.toJSON()))
         if raw_data.status_code != 201:
             return TebexError(raw_data.json()['error_message'])
         return raw_data.json()
@@ -213,7 +213,7 @@ class Tebex:
         if not username:
             return TebexError('You have to set an username')
 
-        raw_data = requests.put(self.BASE_URL + self.ENDPOINTS['payments'] + '/' + transaction_id, headers={"X-Tebex-Secret": self.secret}, data={'username': username, 'status': status})
+        raw_data = requests.put(self.BASE_URL + self.ENDPOINTS['payments'] + '/' + transaction_id, headers=self.HEADERS, data={'username': username, 'status': status})
         
         if raw_data.status_code != 204:
             return TebexError(raw_data.json()['error_message'])
@@ -227,7 +227,7 @@ class Tebex:
             return TebexError('No note to add')
 
 
-        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['payments'] + '/' + transaction_id + '/note', headers={"X-Tebex-Secret": self.secret}, data={'note': note})
+        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['payments'] + '/' + transaction_id + '/note', headers=self.HEADERS, data={'note': note})
         
         if raw_data.status_code != 201:
             return TebexError(raw_data.json()['error_message'])
@@ -242,25 +242,25 @@ class Tebex:
         if not username:
             return TebexError('No username to create checkout URL')
 
-        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['checkout'], headers={"X-Tebex-Secret": self.secret}, data={'package_id': package_id, 'username': username})
+        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['checkout'], headers=self.HEADERS, data={'package_id': package_id, 'username': username})
         if raw_data.status_code != 201:
             return TebexError(raw_data.json()['error_message'])
         return raw_data.json()
     
     # Giftcards
     def get_giftcards(self) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['gift-cards'], headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['gift-cards'], headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     def get_giftcard(self, giftcard_id : str) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['gift-cards'] + '/' + giftcard_id, headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['gift-cards'] + '/' + giftcard_id, headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     def create_giftcard(self, giftcard_data : TebexGiftcard) -> dict:
         if not giftcard_data:
             return TebexError('No giftcard data to create')
 
-        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['gift-cards'], headers={"X-Tebex-Secret": self.secret}, data=giftcard_data.toJSON())
+        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['gift-cards'], headers=self.HEADERS, data=giftcard_data.toJSON())
         if raw_data.status_code != 201:
             return TebexError(raw_data.json()['error_message'])
         return raw_data.json()
@@ -269,14 +269,14 @@ class Tebex:
         if not giftcard_id:
             return TebexError('No giftcard ID to delete')
 
-        raw_data = requests.delete(self.BASE_URL + self.ENDPOINTS['gift-cards'] + '/' + giftcard_id, headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.delete(self.BASE_URL + self.ENDPOINTS['gift-cards'] + '/' + giftcard_id, headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     def update_giftcard(self, giftcard_id : str, amount : int = 0):
         if not giftcard_id:
             return TebexError('No giftcard ID to update')
 
-        raw_data = requests.put(self.BASE_URL + self.ENDPOINTS['gift-cards'] + '/' + giftcard_id, headers={"X-Tebex-Secret": self.secret}, data={'amount': amount})
+        raw_data = requests.put(self.BASE_URL + self.ENDPOINTS['gift-cards'] + '/' + giftcard_id, headers=self.HEADERS, data={'amount': amount})
         
         if raw_data.status_code != 204:
             return TebexError(raw_data.json()['error_message'])
@@ -285,18 +285,18 @@ class Tebex:
     
     # Coupons
     def get_coupons(self) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['coupons'], headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['coupons'], headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     def get_coupon(self, coupon_id : str) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['coupons'] + '/' + coupon_id, headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['coupons'] + '/' + coupon_id, headers=self.HEADERS)
         return self.__handle_response(raw_data)
     
     def create_coupon(self, coupon : TebexCoupon) -> dict:
         if not coupon:
             return TebexError('No coupon data to create')
 
-        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['coupons'], headers={"X-Tebex-Secret": self.secret}, data=coupon.toJSON())
+        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['coupons'], headers=self.HEADERS, data=coupon.toJSON())
         if raw_data.status_code != 201:
             return TebexError(raw_data.json()['error_message'])
         return raw_data.json()
@@ -305,7 +305,7 @@ class Tebex:
         if not coupon_id:
             return TebexError('No coupon ID to delete')
 
-        raw_data = requests.delete(self.BASE_URL + self.ENDPOINTS['coupons'] + '/' + coupon_id, headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.delete(self.BASE_URL + self.ENDPOINTS['coupons'] + '/' + coupon_id, headers=self.HEADERS)
         
         if raw_data.status_code != 204:
             return TebexError(raw_data.json()['error_message'])
@@ -313,7 +313,7 @@ class Tebex:
     
     # Bans
     def get_bans(self) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['bans'], headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['bans'], headers=self.HEADERS)
         return self.__handle_response(raw_data)
     
     def create_ban(self, reason: str, ip: str,user : str):
@@ -324,7 +324,7 @@ class Tebex:
         if not user:
             return TebexError('No user to create ban')
 
-        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['bans'], headers={"X-Tebex-Secret": self.secret}, data={'reason': reason, 'ip': ip, 'user': user})
+        raw_data = requests.post(self.BASE_URL + self.ENDPOINTS['bans'], headers=self.HEADERS, data={'reason': reason, 'ip': ip, 'user': user})
         if raw_data.status_code != 201:
             return TebexError(raw_data.json()['error_message'])
         return raw_data.json()
@@ -332,7 +332,7 @@ class Tebex:
     # Sales
 
     def get_sales(self) -> dict:
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['sales'], headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['sales'], headers=self.HEADERS)
         return self.__handle_response(raw_data)
     
     # Player Lookup
@@ -341,7 +341,7 @@ class Tebex:
         if not username:
             return TebexError('No username to lookup')
 
-        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['user'] + username, headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(self.BASE_URL + self.ENDPOINTS['user'] + username, headers=self.HEADERS)
         return self.__handle_response(raw_data)
 
     # Customer Purchases
@@ -354,5 +354,5 @@ class Tebex:
         if package_id:
             url += '?package=' + str(package_id)
 
-        raw_data = requests.get(url, headers={"X-Tebex-Secret": self.secret})
+        raw_data = requests.get(url, headers=self.HEADERS)
         return self.__handle_response(raw_data)
